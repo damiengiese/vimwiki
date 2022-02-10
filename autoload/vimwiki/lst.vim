@@ -842,6 +842,9 @@ endfunction
 "updates the symbol of a checkboxed item according to the symbols of its
 "children
 function! s:update_state(item) abort
+  " TODO: Make parent/child updates configuratble.
+  return
+
   if a:item.type == 0 || a:item.cb ==? ''
     return
   endif
@@ -904,7 +907,7 @@ function! s:create_cb(item, start_rate) abort
   let new_item = a:item
   let new_item.cb = s:rate_to_state(a:start_rate)
   call s:substitute_rx_in_line(new_item.lnum,
-        \ vimwiki#u#escape(new_item.mrkr) . '\zs\ze', ' [' . new_item.cb . ']')
+        \ vimwiki#u#escape(new_item.mrkr) . '\s\+\zs\ze', '[' . new_item.cb . '] ')
 
   call s:update_state(new_item)
   return 1
@@ -1412,7 +1415,9 @@ endfunction
 function! s:clone_marker_from_to(from, to) abort
   let item_from = s:get_item(a:from)
   if item_from.type == 0 | return | endif
-  let new_mrkr = item_from.mrkr . ' '
+  " TODO: make the padding congigurable.
+  let spaces = max([1, 4-len(item_from.mrkr)])
+  let new_mrkr = item_from.mrkr . repeat(' ', spaces)
   call s:substitute_rx_in_line(a:to, '^\s*', new_mrkr)
   let new_indent = ( vimwiki#vars#get_syntaxlocal('recurring_bullets') ? 0 : indent(a:from) )
   call s:set_indent(a:to, new_indent)
